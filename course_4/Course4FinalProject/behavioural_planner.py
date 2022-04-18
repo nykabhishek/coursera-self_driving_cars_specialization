@@ -455,12 +455,12 @@ def get_closest_index(waypoints, ego_state):
     closest_index = 0
     # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
     # ------------------------------------------------------------------
-    x_1 = ego_state[0]
-    y_1 = ego_state[1] 
     
     for i in range(len(waypoints)):
         
+        x_1 = ego_state[0]
         x_2 = waypoints[i][0]
+        y_1 = ego_state[1]
         y_2 = waypoints[i][1]
         
         closest_len_temp = math.sqrt(((x_2 - x_1)**2)+((y_2 - y_1)**2))
