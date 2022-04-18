@@ -82,8 +82,15 @@ class CollisionChecker:
 
                 # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                 # --------------------------------------------------------------
-                # circle_locations[:, 0] = ... 
-                # circle_locations[:, 1] = ...
+                point_x = path[0][j]
+                point_y = path[1][j]
+
+                #circle_locations[:, 0] = point_x + self._circle_offsets*np.cos(path[2][j])
+                #circle_locations[:, 1] = point_y + self._circle_offsets*np.sin(path[2][j])
+
+                for a in range(len(self._circle_offsets)):
+                    circle_locations[a, 0] = point_x + self._circle_offsets[a]*np.cos(path[2][j])
+                    circle_locations[a, 1] = point_y + self._circle_offsets[a]*np.sin(path[2][j])
                 # --------------------------------------------------------------
 
                 # Assumes each obstacle is approximated by a collection of
@@ -177,7 +184,10 @@ class CollisionChecker:
                         if not collision_check_array[j]:
                             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                             # --------------------------------------------------
-                            # score += self._weight * ...
+                            delta_x = paths[i][0][-1] - paths[j][0][-1]
+                            delta_y = paths[i][1][-1] - paths[j][1][-1]
+                            score_2 = np.sqrt((delta_x**2)+(delta_y**2)) 
+                            score += self._weight * score_2
                             # --------------------------------------------------
 
                             pass
