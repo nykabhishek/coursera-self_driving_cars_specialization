@@ -111,13 +111,9 @@ class BehaviouralPlanner:
             # for stop signs, and compute the goal state accordingly.
             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
             # ------------------------------------------------------------------
-            goal_index, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
-            self._goal_index = goal_index
-
-            x_goal = waypoints[self._goal_index][0]
-            y_goal = waypoints[self._goal_index][1]
-            v_goal = waypoints[self._goal_index][2]
-            self._goal_state = [x_goal, y_goal, v_goal]
+            new_index, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
+            self._goal_index = new_index if stop_sign_found else goal_index
+            self._goal_state = waypoints[self._goal_index]
             # ------------------------------------------------------------------
 
             # If stop sign found, set the goal to zero speed, then transition to 
@@ -140,6 +136,7 @@ class BehaviouralPlanner:
             # ------------------------------------------------------------------
             if closed_loop_speed < STOP_THRESHOLD:
                 self._state = STAY_STOPPED
+                self._stop_count = 0
             # ------------------------------------------------------------------
 
             # pass
@@ -167,12 +164,7 @@ class BehaviouralPlanner:
                 # --------------------------------------------------------------
                 _, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
                 self._goal_index = goal_index
-
-                x_goal = waypoints[self._goal_index][0]
-                y_goal = waypoints[self._goal_index][1]
-                v_goal = waypoints[self._goal_index][2]
-
-                self._goal_state = [x_goal, y_goal, v_goal]
+                self._goal_state = waypoints[self._goal_index]
                 # --------------------------------------------------------------
 
                 # If the stop sign is no longer along our path, we can now
@@ -259,17 +251,19 @@ class BehaviouralPlanner:
         # Otherwise, find our next waypoint.
         # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
         # ------------------------------------------------------------------
+        wp_index +=1
+        
         while wp_index < len(waypoints) - 1:
-            x_1 = waypoints[wp_index][0]
-            x_2 = waypoints[wp_index+1][0]
-            y_1 = waypoints[wp_index][1]
-            y_2 = waypoints[wp_index+1][1]
+            x1, y1, v1 = waypoints[wp_index-1]
+            x2, y2, v2 = waypoints[wp_index]
             
-            arc_length += math.sqrt(((x_2 - x_1)**2)+((y_2 - y_1)**2))
-            wp_index += 1
+            curr_length = np.sprt((x2-x1)**2 + (y2-y1)**2)
+            arc_length += curr_length
 
             if arc_length > self._lookahead:
                 return wp_index
+            else:
+                wp_index += 1
         # ------------------------------------------------------------------
 
         return wp_index
@@ -456,19 +450,16 @@ def get_closest_index(waypoints, ego_state):
     # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
     # ------------------------------------------------------------------
     
+    ego_x, ego_y, ego_yaw, ego_open_loop_speed = ego_state
     for i in range(len(waypoints)):
-        
-        x_1 = ego_state[0]
-        x_2 = waypoints[i][0]
-        y_1 = ego_state[1]
-        y_2 = waypoints[i][1]
-        
-        closest_len_temp = math.sqrt(((x_2 - x_1)**2)+((y_2 - y_1)**2))
-        
-        if closest_len_temp < closest_len :
-            closest_len = closest_len_temp
-            closest_index = i
 
+        wx, wy, wv = waypoints[i]
+        curr_len = (ego_x - wx)**2 + (ego_y - wy)**2
+        
+        if curr_len < closest_len :
+            closest_len = closest_len
+            closest_index = i
+    closest_len = np.sqrt(closest_len)
     # ------------------------------------------------------------------
 
     return closest_len, closest_index
